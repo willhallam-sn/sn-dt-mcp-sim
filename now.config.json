@@ -1,0 +1,6 @@
+{
+  "scope": "x_snc_dynatrace_mc",
+  "scopeId": "8b0588293b738750f40c93ae53e45a94",
+  "name": "Dynatrace MCP Simulator",
+  "tsconfigPath": "./src/server/tsconfig.json"
+}
