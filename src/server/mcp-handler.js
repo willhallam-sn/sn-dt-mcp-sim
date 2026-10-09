@@ -1,7 +1,7 @@
 import {
     buildInitializeResult,
     buildToolsListResult,
-    findToolResult,
+    resolveToolResult,
     missingToolResult,
     jsonrpcResult,
     jsonrpcError,
@@ -46,7 +46,7 @@ function dispatch(message) {
         case 'tools/call': {
             var toolName = params.name
             var args = params.arguments || {}
-            var result = findToolResult(toolName, args)
+            var result = resolveToolResult(toolName, args)
             if (!result) {
                 result = missingToolResult(toolName, args)
             }

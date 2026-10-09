@@ -1,4 +1,23 @@
 import { GlideRecord, gs } from '@servicenow/glide'
+import { generateDqlResult } from './dql-generator.js'
+
+/**
+ * Tool response strategy registry.
+ *
+ * Tools listed here are GENERATED (a server-side function synthesizes the
+ * result per call). Everything else is CANNED (looked up from the table by
+ * tool name + argument key). This is the hybrid, per-tool model:
+ *   - get-problem-by-id -> canned (stable facts keyed by problemId)
+ *   - execute-dql       -> generated (plausible, now()-relative Grail data)
+ */
+var GENERATED_TOOLS = {
+    'execute-dql': function (args) {
+        return generateDqlResult(args)
+    },
+}
+
+/** Internal tool_name used for editable base-fact rows the generator reads. */
+export var FACT_TOOL = '_fact'
 
 /**
  * Shared logic for the Dynatrace MCP Simulator.
@@ -152,11 +171,22 @@ export function buildToolsListResult() {
     gr.query()
     while (gr.next()) {
         var t = '' + gr.getValue('tool_name')
-        if (t && !seen[t]) {
+        if (t && t !== FACT_TOOL && !seen[t]) {
             seen[t] = true
             tools.push({
                 name: t,
                 description: 'Simulated Dynatrace MCP tool: ' + t,
+                inputSchema: { type: 'object', additionalProperties: true },
+            })
+        }
+    }
+    // Always advertise generated tools even if they have no table rows.
+    for (var gkey in GENERATED_TOOLS) {
+        if (Object.prototype.hasOwnProperty.call(GENERATED_TOOLS, gkey) && !seen[gkey]) {
+            seen[gkey] = true
+            tools.push({
+                name: gkey,
+                description: 'Simulated Dynatrace MCP tool: ' + gkey,
                 inputSchema: { type: 'object', additionalProperties: true },
             })
         }
@@ -211,6 +241,20 @@ export function missingToolResult(toolName, args) {
         ],
         isError: true,
     }
+}
+
+/**
+ * Resolve the MCP result for a tools/call, routing by the tool strategy:
+ * generated tools run their generator; everything else is a canned lookup.
+ * Returns the MCP result object, or null if a canned tool has no matching row
+ * (the handler then emits missingToolResult).
+ */
+export function resolveToolResult(toolName, args) {
+    var gen = GENERATED_TOOLS[toolName]
+    if (gen) {
+        return gen(args || {})
+    }
+    return findToolResult(toolName, args)
 }
 
 export function jsonrpcResult(id, result) {

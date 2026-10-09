@@ -97,6 +97,10 @@ declare global {
                         table: 'sys_module'
                         id: '1d2c2c1e8f8e4ad19c6a642cea69564c'
                     }
+                    'src_server_dql-generator_js': {
+                        table: 'sys_module'
+                        id: '6bcf34cbc8b44d84bbc7ede5ada82a62'
+                    }
                     'src_server_key-hash-br_js': {
                         table: 'sys_module'
                         id: '9cd0119425ab4f1c8670655acec8119f'

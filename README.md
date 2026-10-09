@@ -3,9 +3,10 @@
 A ServiceNow scoped application that **emulates the Dynatrace MCP server** inside
 the platform, to support demos. It exposes a REST endpoint that speaks the Model
 Context Protocol (MCP) so AI agents expecting to talk to a real Dynatrace tenant
-can call it unchanged. The responses it returns are **canned**, stored in an
-editable table, so you can tailor exactly what the "tenant" says for a given demo
-without touching code.
+can call it unchanged. Responses follow a **hybrid, per-tool model**: some tools
+return **canned** payloads from an editable table, while `execute-dql` is
+**generated** on the fly so situational data (timestamps, time windows, bin
+series, counts, error rates) is always plausible for the moment it is called.
 
 - **Scope:** `x_snc_dynatrace_mc`
 - **Fluent SDK:** 4.13.6
@@ -190,21 +191,47 @@ sequenceDiagram
 | `initialize` | `buildInitializeResult` | Returns `serverInfo`/`capabilities`; echoes client `protocolVersion`; issues `Mcp-Session-Id`. |
 | `notifications/*` | handler | Acked with `202`, no body. |
 | `tools/list` | `buildToolsListResult` | Uses a canned `tools/list` row if present; otherwise synthesizes the list from the distinct `tools/call` rows. |
-| `tools/call` | `findToolResult` | Looks up the canned row (see matching logic). |
+| `tools/call` | `resolveToolResult` | Routes by **tool strategy**: generated tools run their generator; canned tools look up a row (see matching logic). |
 | `ping` | handler | Returns `{}`. |
 
-### Tools (seeded from `mcp-rronly.json`)
+### Tools & response strategy
 
-The toolset is **data-driven** — any tool present in the table is advertised and
-answerable. The shipped seed data covers:
+Each tool has a **response strategy** (`GENERATED_TOOLS` registry in `mcp-lib.js`):
 
-| Tool | Argument | What it simulates |
-|---|---|---|
-| `get-problem-by-id` | `problemId` (e.g. `P-261013`) | A Davis problem record (`structuredContent.records[...]`). |
-| `execute-dql` | `dqlQueryString` | Grail DQL results for service-entity, spans, and logs queries. |
+| Tool | Argument | Strategy | What it does |
+|---|---|---|---|
+| `get-problem-by-id` | `problemId` (e.g. `P-261013`) | **canned** | Returns the stored Davis-problem payload matched by `problemId`. |
+| `execute-dql` | `dqlQueryString` | **generated** | `dql-generator.js` synthesizes a plausible Grail response from the parsed query — no stored blob to match. |
 
-To add or change tools, add/edit rows in the table or import a capture that
-contains them — no code change required.
+Canned tools are data-driven — any tool with `tools/call` rows is advertised and
+answerable; add/edit rows or import a capture to extend them. Generated tools are
+always advertised even with no table rows.
+
+### The DQL generator (`execute-dql`)
+
+Because the real `execute-dql` result depends on *when* and *how* it is called,
+canning a static blob is brittle (the agent varies `from: now()-60m/-30m`, bin
+size, `limit`, and exact text each run). Instead the generator parses the query —
+data source, filters (entity id, `span.name`, `status=="error"`,
+`matchesPhrase`), time window, `interval`/`bin()`, `limit`, `sort` — and
+synthesizes the real Grail envelope (3 `content` text blocks + `structuredContent`
+with `records`, `metadata.grail` echoing the query, and `types`) using
+`now()`-relative timestamps and a bin series spanning the requested window.
+
+Supported query families: `describe dt.entity.service`, `fetch dt.entity.service`,
+`fetch dt.davis.problems`, `fetch spans` (raw, `summarize … by span.name`, and
+`summarize … by bin()` error-rate series), `fetch logs` (incl. `matchesPhrase`),
+and `timeseries dt.service.request.*`. Unknown shapes return a valid-but-empty
+Grail result (`records: []`); obviously malformed DQL (unbalanced quotes/parens)
+returns a `DQL-ERROR-PARSING` result like the real server.
+
+**Editable base facts** (so demos stay tunable without code): the generator reads
+rows with `tool_name = _fact`, keyed by `match_key`, falling back to built-in
+defaults. The shipped `service-catalog` fact defines the service topology and the
+per-service **error-rate profile** (which endpoint spikes and to what peak %, e.g.
+`GET /api/recommendations` → 7.89%), which drives the spans/timeseries error
+series so they stay coherent with the `P-261013` problem narrative. `_fact` rows
+are never advertised as tools.
 
 ---
 
@@ -423,10 +450,11 @@ src/
 │   └── tables/canned-response.now.ts  Canned MCP Response table + form
 └── server/
     ├── auth-lib.js                 Pure-JS SHA-256, key extract/verify, IP allow list, logging (canonical)
+    ├── dql-generator.js            execute-dql response generator (parses DQL, synthesizes Grail data from facts)
     ├── key-hash-br.js              BR script (inlined SHA-256) — keep salt/algo in sync with auth-lib.js
     ├── mcp-handler.js              /mcp handler: gate, dispatch, batch, sessions
     ├── mcp-import.js               /import handler: gate, parse, upsert, regenerate tools/list
-    └── mcp-lib.js                  Matching + capture-file parsing (shared)
+    └── mcp-lib.js                  Tool-strategy registry, canned matching, capture-file parsing (shared)
 
 AUTH.md             Design brief for the auth/source-restriction approach
 init-properties.js  Background helper for the IP allow list
@@ -438,19 +466,16 @@ seed-data.xml.txt   Unload file of seed rows (rename to .xml to import)
 
 ## Limitations
 
-- **Canned, not live:** responses are static table data. There is no real Grail,
-  Davis, or Smartscape behind this — timestamps and metrics are whatever is
-  stored.
-- **Matching is argument-shape-aware, not semantic:** DQL matches on normalized
-  text, not query semantics. A query that differs only in whitespace matches; a
-  semantically-equivalent but textually-different query does not (add a row or a
-  `default` fallback for the tool).
+- **Canned tools are static table data; generated tools are heuristic.** There is
+  no real Grail, Davis, or Smartscape behind this. `get-problem-by-id` returns
+  stored facts; `execute-dql` data is synthesized by `dql-generator.js` from a
+  parsed query + base facts, not a real query engine.
+- **The DQL generator covers the SRE-agent repertoire, not all of DQL.** It
+  recognizes the data sources, filters, and clauses listed above; other shapes
+  return a valid-but-empty Grail result. It parses patterns heuristically — it
+  does not execute DQL semantics (joins, arbitrary aggregations, lookups).
 - **IP allow list is defense-in-depth,** not a hard network boundary (see auth
   section).
-- **Seed vs. capture fidelity:** the manual seed rows carry full
-  `structuredContent` plus a concise `content` summary; the verbose Grail `types`
-  arrays are empty. Import `mcp-rronly.json` via `/import` for byte-exact
-  `content`/`types` blocks.
 - **Dual SHA-256 copies** (`auth-lib.js` + `key-hash-br.js`) must be kept in sync
   by hand if the algorithm or salt changes.
 ```
