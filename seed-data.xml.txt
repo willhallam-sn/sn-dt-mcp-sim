@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dynatrace MCP Simulator - initial seed data for the Canned MCP Response table
+  (x_snc_dynatrace_mc_response), reconstructed from the captured mcp-rronly.json
+  exchanges.
+
+  >>> RENAME THIS FILE TO seed-data.xml BEFORE IMPORTING <<<
+  (the editor tooling cannot write a .xml file directly, so it is saved as .xml.txt)
+
+  HOW TO IMPORT (manual):
+    1. In the ServiceNow instance, navigate to the "Canned MCP Response" list
+       (x_snc_dynatrace_mc_response.list).
+    2. Right-click the list header > Import XML.
+    3. Choose this file (seed-data.xml) and upload.
+    Each record uses action="INSERT_OR_UPDATE" with a fixed sys_id, so re-importing
+    updates the same rows rather than creating duplicates.
+
+  After import, point an MCP client at:
+    POST /api/x_snc_dynatrace_mc/dynatrace_mcp/mcp
+  Edit any row's "Response Payload (JSON result)" to change what the fake tenant returns.
+-->
+<unload unload_date="2026-10-01 00:00:00">
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key/>
+    <match_type>default</match_type>
+    <method>initialize</method>
+    <name>initialize</name>
+    <notes>MCP initialize handshake. Returns serverInfo for dynatrace-mcp. Seeded from mcp-rronly.json.</notes>
+    <request_arguments/>
+    <response_payload>{"protocolVersion":"2025-06-18","capabilities":{"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":false}},"serverInfo":{"name":"dynatrace-mcp","version":"1.0"}}</response_payload>
+    <sequence>10</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000001</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name/>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key/>
+    <match_type>default</match_type>
+    <method>tools/list</method>
+    <name>tools/list</name>
+    <notes>Advertised tools for the simulated Dynatrace MCP server.</notes>
+    <request_arguments/>
+    <response_payload>{"tools":[{"name":"get-problem-by-id","description":"Get a Dynatrace Davis problem by its display id (for example P-261013).","inputSchema":{"type":"object","properties":{"problemId":{"type":"string","description":"The problem display id, e.g. P-261013"}},"required":["problemId"],"additionalProperties":false}},{"name":"execute-dql","description":"Execute a Dynatrace Query Language (DQL) statement against Grail and return the result records.","inputSchema":{"type":"object","properties":{"dqlQueryString":{"type":"string","description":"The DQL query to execute"}},"required":["dqlQueryString"],"additionalProperties":false}}]}</response_payload>
+    <sequence>20</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000002</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name/>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>problemId:P-261013</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>get-problem-by-id :: P-261013</name>
+    <notes>Davis problem P-261013 (Failure rate increase on service frontend). Seeded from mcp-rronly.json.</notes>
+    <request_arguments>{"problemId":"P-261013"}</request_arguments>
+    <response_payload>{"content":[{"type":"text","text":"Retrieved Davis problem P-261013 (Failure rate increase) affecting service 'frontend'. See structuredContent for the full problem record."}],"isError":false,"structuredContent":{"records":[{"timestamp":"2026-10-01T15:14:56.687000000Z","event.category":"ERROR","display_id":"P-261013","dt.davis.mute.status":"NOT_MUTED","event.end":"2026-10-01T15:14:00.000000000Z","affected_entity_types":["dt.entity.service"],"event.status":"CLOSED","dt.davis.impact_level":["Services"],"dt.analysis.offset":"-300000000000","smartscape.affected_entities":[{"name":"frontend","id":"SERVICE-612D78ED86A2A09B","type":"SERVICE"}],"dt.entity.service":["SERVICE-612D78ED86A2A09B"],"event.kind":"DAVIS_PROBLEM","dt.analysis.ready":true,"affected_entity_ids":["SERVICE-612D78ED86A2A09B"],"labels.alerting_profile":["Default"],"event.severity":"3","smartscape.affected_entity.ids":["SERVICE-612D78ED86A2A09B"],"event.name":"Failure rate increase","resolved_problem_duration":"300000000000","dt.davis.is_duplicate":false,"dt.davis.is_frequent_event":false,"affected_entity_names":["frontend"],"dt.davis.event_ids":["4942294426818263191_1790867040000"],"maintenance.is_under_maintenance":false,"event.description":"# Failure rate increase\n\nThe problem **affects 1 entity** overall.\n\nFollowing entities were affected by the problem:\n\n**Application Observability service, frontend**\n\nError: Failure rate increase\n\n- The error rate increased to 7.89 %.\nEndpoint GET /api/recommendations has a failure rate increase.","dt.duration_marker":"300000000000","event.status_transition":"UPDATED","smartscape.affected_entity.types":["SERVICE"],"event.id":"4942294426818263191_1790867040000V2","event.start":"2026-10-01T15:09:00.000000000Z","dt.openpipeline.source":"classic_root_cause_analysis","dt.openpipeline.pipelines":["davis.problems:default"]}],"metadata":{"grail":{"canonicalQuery":"fetch dt.davis.problems, from:now() - 24h | filter event.id == \"P-261013\" OR event.id == concat(\"P-261013\", \"V2\") OR display_id == \"P-261013\"","timezone":"Z","query":"fetch dt.davis.problems, from:now()-24h | filter event.id == \"P-261013\" or event.id == concat(\"P-261013\", \"V2\") or display_id == \"P-261013\"","scannedRecords":1219,"dqlVersion":"V1_0","scannedBytes":2456683,"scannedDataPoints":0,"analysisTimeframe":{"start":1790781331.8579636,"end":1790867731.8579636},"locale":"und","executionTimeMilliseconds":51,"notifications":[],"queryId":"01a0f808-f587-70f4-9a01-24989964bc73","sampled":false},"metrics":[]},"types":[]}}</response_payload>
+    <sequence>100</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000003</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>get-problem-by-id</tool_name>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>dql:fetch dt.entity.service | fieldsAdd dt.system.table, dt.system.environment, lifetime, serviceType, instantiates, externalDependency, belongs_to, fallbackServiceType, databaseName, gcpZone, applicationReleaseVersion, publicDomainName, serviceDetectionAttributes, remoteServiceName, softwareTechnologies, webApplicationId, esbApplicationName, path, publicCloudId, ibmCtgServerName, entity.detected_name, entity.name, id, clustered_by, customIconPath, entity.conditional_name, sends_to, ipAddress, receives_from, called_by, indirectly_sends_to, webServiceName, boshName, tags, webServiceNamespace, contains, port, databaseHostNames, serviceSubType, unifiedServiceIndicators, applicationEnvironment, runs_on, icon, className, applicationBuildVersion, remoteEndpoint, matchedServiceDetectionV2Rules, managementZones, entity.type, databaseVendor, serviceTechnologyTypes, applicationName, agentTechnologyType, cloudDatabaseProvider, publicCloudRegion, oneAgentCustomHostName, webServerName, groups, entity.customized_name, akkaActorSystem, contextRoot, indirectly_receives_from, isExternalService, dt.security_context, ibmCtgGatewayUrl, calls, awsNameTag, remoteCrossEnvironments | filter id == "SERVICE-612D78ED86A2A09B"</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>execute-dql :: fetch dt.entity.service (frontend)</name>
+    <notes>Service entity details for SERVICE-612D78ED86A2A09B (frontend). Seeded from mcp-rronly.json.</notes>
+    <request_arguments>{"dqlQueryString":"fetch dt.entity.service | fieldsAdd dt.system.table, dt.system.environment, lifetime, serviceType, instantiates, externalDependency, belongs_to, fallbackServiceType, databaseName, gcpZone, applicationReleaseVersion, publicDomainName, serviceDetectionAttributes, remoteServiceName, softwareTechnologies, webApplicationId, esbApplicationName, path, publicCloudId, ibmCtgServerName, entity.detected_name, entity.name, id, clustered_by, customIconPath, entity.conditional_name, sends_to, ipAddress, receives_from, called_by, indirectly_sends_to, webServiceName, boshName, tags, webServiceNamespace, contains, port, databaseHostNames, serviceSubType, unifiedServiceIndicators, applicationEnvironment, runs_on, icon, className, applicationBuildVersion, remoteEndpoint, matchedServiceDetectionV2Rules, managementZones, entity.type, databaseVendor, serviceTechnologyTypes, applicationName, agentTechnologyType, cloudDatabaseProvider, publicCloudRegion, oneAgentCustomHostName, webServerName, groups, entity.customized_name, akkaActorSystem, contextRoot, indirectly_receives_from, isExternalService, dt.security_context, ibmCtgGatewayUrl, calls, awsNameTag, remoteCrossEnvironments | filter id == \"SERVICE-612D78ED86A2A09B\""}</request_arguments>
+    <response_payload>{"content":[{"type":"text","text":"Retrieved 1 service entity (frontend, SERVICE-612D78ED86A2A09B). See structuredContent for details."}],"isError":false,"structuredContent":{"records":[{"entity.name":"frontend","id":"SERVICE-612D78ED86A2A09B","dt.system.table":"entities","dt.system.environment":"aew31262","lifetime":{"start":"2026-09-30T21:25:34.733000000Z","end":"2026-10-01T15:15:33.925000000Z"},"serviceType":"UNIFIED","serviceDetectionAttributes":{"service.name":"frontend"},"softwareTechnologies":["type:NODE_JS,edition:null,version:null"],"entity.detected_name":"frontend","called_by":{"dt.entity.service":["SERVICE-352C0D90592C8454"]},"unifiedServiceIndicators":["METRIC","TRACE"],"icon":{"primaryIconType":"node-js"},"matchedServiceDetectionV2Rules":["{serviceDetectionRule={name=[Built-in] OpenTelemetry service name (deprecated), scope=tenant, id=284f7760-bae3-49b7-8346-1276f10017ad}}"],"entity.type":"SERVICE","groups":{"dt.entity.service_method_group":["SERVICE_METHOD_GROUP-612D78ED86A2A09B"]},"calls":{"dt.entity.service":["SERVICE-50FA7E919B28E12B","SERVICE-3C92115F407E5A92","SERVICE-FA5C2B6FCA01E2EF","SERVICE-5173FDDC82067426","SERVICE-6550EEA117BD5577","SERVICE-837D260324B57999","SERVICE-889783342AAF4FF8","SERVICE-826D760F82C46C41"]}}],"metadata":{"grail":{"canonicalQuery":"fetch dt.entity.service | filter id == \"SERVICE-612D78ED86A2A09B\"","timezone":"Z","query":"fetch dt.entity.service | filter id == \"SERVICE-612D78ED86A2A09B\"","scannedRecords":1,"dqlVersion":"V1_0","scannedBytes":0,"scannedDataPoints":0,"analysisTimeframe":{"start":1790860554.7225225,"end":1790867754.7225225},"locale":"und","executionTimeMilliseconds":197,"notifications":[],"queryId":"01a0f809-4ecd-7254-b402-ff4d654a0e33","sampled":false},"metrics":[]},"types":[]}}</response_payload>
+    <sequence>100</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000004</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>execute-dql</tool_name>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>dql:fetch spans, from: now() - 2h | filter in(dt.entity.service, array("SERVICE-612D78ED86A2A09B")) | filter span.status == "error" | summarize { errorCount = count(), uniqueTraces = countDistinct(trace.id) }, by: {service.name, service.namespace, span.name} | sort errorCount desc | limit 20</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>execute-dql :: error spans for frontend (empty)</name>
+    <notes>Error-span summary query for frontend; returned no records. Seeded from mcp-rronly.json.</notes>
+    <request_arguments>{"dqlQueryString":"fetch spans, from: now() - 2h | filter in(dt.entity.service, array(\"SERVICE-612D78ED86A2A09B\")) | filter span.status == \"error\" | summarize { errorCount = count(), uniqueTraces = countDistinct(trace.id) }, by: {service.name, service.namespace, span.name} | sort errorCount desc | limit 20"}</request_arguments>
+    <response_payload>{"content":[{"type":"text","text":"No matching error spans were found for the given query."}],"isError":false,"structuredContent":{"records":[],"metadata":{"grail":{"canonicalQuery":"fetch spans, from:now() - 2h | filter in(dt.entity.service, array(\"SERVICE-612D78ED86A2A09B\")) | filter span.status == \"error\" | summarize by:{service.name, service.namespace, span.name}, {errorCount = count(), uniqueTraces = countDistinct(trace.id)} | sort errorCount desc | limit 20","timezone":"Z","query":"fetch spans, from: now() - 2h | filter in(dt.entity.service, array(\"SERVICE-612D78ED86A2A09B\")) | filter span.status == \"error\" | summarize { errorCount = count(), uniqueTraces = countDistinct(trace.id) }, by: {service.name, service.namespace, span.name} | sort errorCount desc | limit 20","scannedRecords":1189703,"dqlVersion":"V1_0","scannedBytes":38111525,"scannedDataPoints":0,"analysisTimeframe":{"start":1790860569.1648784,"end":1790867769.1648784},"locale":"und","executionTimeMilliseconds":38,"notifications":[],"queryId":"01a0f809-873f-7bc7-a36b-404e447fca45","sampled":false},"metrics":[]},"types":[]}}</response_payload>
+    <sequence>100</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000005</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>execute-dql</tool_name>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>dql:fetch logs, from: now() - 2h | filter in(dt.source_entity, array("SERVICE-612D78ED86A2A09B")) | filter matchesValue(status, "error") or log.iostream == "stderr" | sort timestamp desc | limit 50</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>execute-dql :: error logs by source entity (empty)</name>
+    <notes>Error-log query filtered by source entity; returned no records. Seeded from mcp-rronly.json.</notes>
+    <request_arguments>{"dqlQueryString":"fetch logs, from: now() - 2h | filter in(dt.source_entity, array(\"SERVICE-612D78ED86A2A09B\")) | filter matchesValue(status, \"error\") or log.iostream == \"stderr\" | sort timestamp desc | limit 50"}</request_arguments>
+    <response_payload>{"content":[{"type":"text","text":"No matching error logs were found for the given source entity."}],"isError":false,"structuredContent":{"records":[],"metadata":{"grail":{"canonicalQuery":"fetch logs, from:now() - 2h | filter in(dt.source_entity, array(\"SERVICE-612D78ED86A2A09B\")) | filter matchesValue(status, \"error\") OR log.iostream == \"stderr\" | sort timestamp desc | limit 50","timezone":"Z","query":"fetch logs, from: now() - 2h | filter in(dt.source_entity, array(\"SERVICE-612D78ED86A2A09B\")) | filter matchesValue(status, \"error\") or log.iostream == \"stderr\" | sort timestamp desc | limit 50","scannedRecords":112397,"dqlVersion":"V1_0","scannedBytes":4256199,"scannedDataPoints":0,"analysisTimeframe":{"start":1790860572.6697197,"end":1790867772.6697197},"locale":"und","executionTimeMilliseconds":31,"notifications":[],"queryId":"01a0f809-94eb-7248-9e1a-3ad0a76a3893","sampled":false},"metrics":[]},"types":[]}}</response_payload>
+    <sequence>100</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000006</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>execute-dql</tool_name>
+  </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>dql:fetch logs, from: now() - 2h | filter matchesPhrase(content, "frontend") | filter matchesValue(status, "error") or log.iostream == "stderr" | sort timestamp desc | limit 50</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>execute-dql :: error logs matching "frontend"</name>
+    <notes>Error-log query matching the phrase "frontend"; returned 1 log line. Seeded from mcp-rronly.json.</notes>
+    <request_arguments>{"dqlQueryString":"fetch logs, from: now() - 2h | filter matchesPhrase(content, \"frontend\") | filter matchesValue(status, \"error\") or log.iostream == \"stderr\" | sort timestamp desc | limit 50"}</request_arguments>
+    <response_payload>{"content":[{"type":"text","text":"Retrieved 1 error log line matching 'frontend'. See structuredContent for details."}],"isError":false,"structuredContent":{"records":[{"timestamp":"2026-10-01T14:13:53.581905000Z","content":"ConnectError: [unknown] network error\n    at nz.from (http://frontend-proxy:8080/_next/static/chunks/1y691jxrd1b_3.js:1:116629)\n    at http://frontend-proxy:8080/_next/static/chunks/1y691jxrd1b_3.js:1:123264\n    at async http://frontend-proxy:8080/_next/static/chunks/1y691jxrd1b_3.js:1:179485","event.type":"LOG","dt.openpipeline.pipelines":["logs:default"],"log.iostream":"stdout","loglevel":"ERROR","status":"ERROR","container.id":"d8d1bb109ea61a50b2e6ed8504a5474eeb28fd15fcf8899cc3175ea6dd40b5e3","container.image.name":"ghcr.io/open-telemetry/demo:latest-load-generator","container.name":"load-generator","dt.entity.container_group":"CONTAINER_GROUP-FD5442754AAADEBA","dt.entity.container_group_instance":"CONTAINER_GROUP_INSTANCE-C15BC4405D90747F","dt.entity.host":"HOST-40ABC661AC32BC7A","dt.entity.host_group":"HOST_GROUP-DB77B5C5BB4D96EF","dt.entity.process_group":["PROCESS_GROUP-1D16CA7F22B23758","PROCESS_GROUP-25BFA540FF29A40C","PROCESS_GROUP-39421670F535664E","PROCESS_GROUP-4678F44F9324C091","PROCESS_GROUP-6C827822D1A3AB92","PROCESS_GROUP-729FEB3FAB67E1F1","PROCESS_GROUP-91420D6A3954436B","PROCESS_GROUP-A71C4D41CE9E2967","PROCESS_GROUP-C446C61741D28239","PROCESS_GROUP-DEF7F4463C2E0D03","PROCESS_GROUP-E3D49014CF727A21","PROCESS_GROUP-E3EFC721C8DC7379","PROCESS_GROUP-E4BBD8713C538665","PROCESS_GROUP-EA6F6A3241B98A04","PROCESS_GROUP-F0D993207F838581","PROCESS_GROUP-F60EFF2724AB02B6","PROCESS_GROUP-F95509E3F9141D0B","PROCESS_GROUP-FA8C25C27988647C"],"dt.entity.process_group_instance":["PROCESS_GROUP_INSTANCE-06D3322E3F167CEB","PROCESS_GROUP_INSTANCE-2E1BBECE139FA024","PROCESS_GROUP_INSTANCE-3E3488AB883F7036","PROCESS_GROUP_INSTANCE-50FD3CEB8730FE99","PROCESS_GROUP_INSTANCE-5C12F731AB8DBFC3","PROCESS_GROUP_INSTANCE-620BE615C7F29AEA","PROCESS_GROUP_INSTANCE-A1E371E5B70D4AEC","PROCESS_GROUP_INSTANCE-A54C78EC2F80A819","PROCESS_GROUP_INSTANCE-B0725541D3B139FB","PROCESS_GROUP_INSTANCE-B40EB4F83AA28689","PROCESS_GROUP_INSTANCE-BFFC7BBDFA7D65D4","PROCESS_GROUP_INSTANCE-C95A7720A4667243","PROCESS_GROUP_INSTANCE-D4288817DECC8AF2","PROCESS_GROUP_INSTANCE-E5AA69B160B9B15D","PROCESS_GROUP_INSTANCE-E7B78B2062AC951D","PROCESS_GROUP_INSTANCE-EAE8388650F1A225","PROCESS_GROUP_INSTANCE-F559665B6F45B93D","PROCESS_GROUP_INSTANCE-F7DD3FD89003A7E1"],"dt.host_group.id":"WHLAB","dt.process_group.detected_name":"Erlang Port Mapper","dt.process_group.id":"PROCESS_GROUP-25BFA540FF29A40C","dt.smartscape.container":"CONTAINER-C15BC4405D90747F","dt.smartscape.host":"HOST-40ABC661AC32BC7A","dt.smartscape.process":"PROCESS-06D3322E3F167CEB","dt.smartscape_source.id":"CONTAINER-C15BC4405D90747F","dt.smartscape_source.type":"CONTAINER","dt.source_entity":["PROCESS_GROUP_INSTANCE-06D3322E3F167CEB","PROCESS_GROUP_INSTANCE-2E1BBECE139FA024","PROCESS_GROUP_INSTANCE-3E3488AB883F7036","PROCESS_GROUP_INSTANCE-50FD3CEB8730FE99","PROCESS_GROUP_INSTANCE-5C12F731AB8DBFC3","PROCESS_GROUP_INSTANCE-620BE615C7F29AEA","PROCESS_GROUP_INSTANCE-A1E371E5B70D4AEC","PROCESS_GROUP_INSTANCE-A54C78EC2F80A819","PROCESS_GROUP_INSTANCE-B0725541D3B139FB","PROCESS_GROUP_INSTANCE-B40EB4F83AA28689","PROCESS_GROUP_INSTANCE-BFFC7BBDFA7D65D4","PROCESS_GROUP_INSTANCE-C95A7720A4667243","PROCESS_GROUP_INSTANCE-D4288817DECC8AF2","PROCESS_GROUP_INSTANCE-E5AA69B160B9B15D","PROCESS_GROUP_INSTANCE-E7B78B2062AC951D","PROCESS_GROUP_INSTANCE-EAE8388650F1A225","PROCESS_GROUP_INSTANCE-F559665B6F45B93D","PROCESS_GROUP_INSTANCE-F7DD3FD89003A7E1"],"host.name":"ubuntu5","log.source":"Container Output","process.technology":["C-Library","Docker","Envoy","Erlang","Go","Java","Nginx","Node.js","PHP","Python","Ruby","SQLite","ZeroMQ"],"dt.openpipeline.source":"oneagent"}],"metadata":{"grail":{"canonicalQuery":"fetch logs, from:now() - 2h | filter matchesPhrase(content, \"frontend\") | filter matchesValue(status, \"error\") OR log.iostream == \"stderr\" | sort timestamp desc | limit 50","timezone":"Z","query":"fetch logs, from: now() - 2h | filter matchesPhrase(content, \"frontend\") | filter matchesValue(status, \"error\") or log.iostream == \"stderr\" | sort timestamp desc | limit 50","scannedRecords":112694,"dqlVersion":"V1_0","scannedBytes":42195796,"scannedDataPoints":0,"analysisTimeframe":{"start":1790860583.6897893,"end":1790867783.6897893},"locale":"und","executionTimeMilliseconds":67,"notifications":[],"queryId":"01a0f809-bffa-799a-8c2a-0d87d6160276","sampled":false},"metrics":[]},"types":[]}}</response_payload>
+    <sequence>100</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da000000000000000000000000000007</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>execute-dql</tool_name>
+  </x_snc_dynatrace_mc_response>
+</unload>
