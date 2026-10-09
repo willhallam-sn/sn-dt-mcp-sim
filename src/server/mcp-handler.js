@@ -6,6 +6,7 @@ import {
     jsonrpcResult,
     jsonrpcError,
     newSessionId,
+    readRequestBody,
 } from './mcp-lib.js'
 import { checkAccess, logRequest } from './auth-lib.js'
 
@@ -87,12 +88,7 @@ export function handleMcp(request, response) {
         return
     }
 
-    var raw = ''
-    try {
-        raw = request.body && request.body.dataString ? request.body.dataString : ''
-    } catch (e) {
-        raw = ''
-    }
+    var body = readRequestBody(request)
 
     // Preserve / assign an MCP session id.
     var sessionId = ''
@@ -106,20 +102,22 @@ export function handleMcp(request, response) {
     }
     response.setHeader('Mcp-Session-Id', sessionId)
 
-    if (!raw) {
-        response.setStatus(202)
-        logRequest(request, 'OK', 202, 'empty-body')
-        return
-    }
-
-    var message
-    try {
-        message = JSON.parse(raw)
-    } catch (e) {
-        response.setStatus(400)
-        response.setBody(jsonrpcError(null, -32700, 'Parse error'))
-        logRequest(request, 'OK', 400, 'parse-error')
-        return
+    // Resolve the JSON-RPC message from the parsed body or the raw string.
+    var message = body.json
+    if (message === undefined) {
+        if (!body.raw) {
+            response.setStatus(202)
+            logRequest(request, 'OK', 202, 'empty-body')
+            return
+        }
+        try {
+            message = JSON.parse(body.raw)
+        } catch (e) {
+            response.setStatus(400)
+            response.setBody(jsonrpcError(null, -32700, 'Parse error'))
+            logRequest(request, 'OK', 400, 'parse-error')
+            return
+        }
     }
 
     var summary = summarize(message)

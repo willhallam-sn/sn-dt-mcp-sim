@@ -5,6 +5,14 @@ declare global {
         namespace Internal {
             interface Keys extends KeysRegistry {
                 explicit: {
+                    '15a0824a3bfbcf500c872d7e53e45a7f': {
+                        table: 'sys_scope_privilege'
+                        id: '15a0824a3bfbcf500c872d7e53e45a7f'
+                    }
+                    '19a0824a3bfbcf500c872d7e53e45a77': {
+                        table: 'sys_scope_privilege'
+                        id: '19a0824a3bfbcf500c872d7e53e45a77'
+                    }
                     '1b2554613b778750f40c93ae53e45a7a': {
                         table: 'sys_scope_privilege'
                         id: '1b2554613b778750f40c93ae53e45a7a'
@@ -20,6 +28,14 @@ declare global {
                     '83ea90a93b778750f40c93ae53e45a22': {
                         table: 'sys_scope_privilege'
                         id: '83ea90a93b778750f40c93ae53e45a22'
+                    }
+                    '91a0824a3bfbcf500c872d7e53e45a83': {
+                        table: 'sys_scope_privilege'
+                        id: '91a0824a3bfbcf500c872d7e53e45a83'
+                    }
+                    '95a0824a3bfbcf500c872d7e53e45a7b': {
+                        table: 'sys_scope_privilege'
+                        id: '95a0824a3bfbcf500c872d7e53e45a7b'
                     }
                     '972558293b378750f40c93ae53e45aa3': {
                         table: 'sys_scope_privilege'
@@ -41,6 +57,10 @@ declare global {
                         table: 'sys_scope_privilege'
                         id: 'd3ead0a53bb78750f40c93ae53e45af9'
                     }
+                    d9a08e0a3bfbcf500c872d7e53e45ab1: {
+                        table: 'sys_scope_privilege'
+                        id: 'd9a08e0a3bfbcf500c872d7e53e45ab1'
+                    }
                     'dynatrace-mcp-api': {
                         table: 'sys_ws_definition'
                         id: '2f6c3987e580432b9f87a4f432426014'
@@ -52,6 +72,14 @@ declare global {
                     'dynatrace-mcp-route-mcp': {
                         table: 'sys_ws_operation'
                         id: '53d67b59ceb14538a8ba089e806eb838'
+                    }
+                    e3f246c23b3fcf500c872d7e53e45ab1: {
+                        table: 'sys_scope_privilege'
+                        id: 'e3f246c23b3fcf500c872d7e53e45ab1'
+                    }
+                    f5b282ce3bbf8f50f40c93ae53e45acd: {
+                        table: 'sys_scope_privilege'
+                        id: 'f5b282ce3bbf8f50f40c93ae53e45acd'
                     }
                     'mcp-api-key-credential': {
                         table: 'api_key_credentials'

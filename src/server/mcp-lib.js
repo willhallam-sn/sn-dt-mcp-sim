@@ -225,6 +225,52 @@ export function newSessionId() {
     return gs.generateGUID()
 }
 
+/**
+ * Robustly read a Scripted REST request body.
+ *
+ * When a route declares `consumes: application/json`, the platform parses the
+ * body into `request.body.data` (an object/array) and leaves
+ * `request.body.dataString` EMPTY. So we must prefer `.data`. Returns
+ * { json, raw }: `json` is the parsed value when the platform parsed it; `raw`
+ * is the unparsed string otherwise. Callers use whichever they need.
+ */
+export function readRequestBody(request) {
+    var result = { json: undefined, raw: '' }
+    var body
+    try {
+        body = request.body
+    } catch (e) {
+        return result
+    }
+    if (!body) return result
+
+    // Prefer the parsed value (JSON bodies land here and dataString is empty).
+    try {
+        var d = body.data
+        if (d !== null && d !== undefined) {
+            if (typeof d === 'object') {
+                result.json = d
+                return result
+            }
+            if (typeof d === 'string' && d !== '') {
+                result.raw = d
+                return result
+            }
+        }
+    } catch (e) {
+        /* fall through to raw */
+    }
+
+    // Fall back to the raw string stream.
+    try {
+        var s = body.dataString
+        if (s) result.raw = '' + s
+    } catch (e) {
+        /* give up */
+    }
+    return result
+}
+
 /* --------------------------------------------------------------------------
  * Capture-file parsing (used by the import endpoint)
  * ------------------------------------------------------------------------ */
