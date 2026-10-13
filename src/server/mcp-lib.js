@@ -1,5 +1,6 @@
 import { GlideRecord, gs } from '@servicenow/glide'
 import { generateDqlResult } from './dql-generator.js'
+import { generateProblemResult } from './problem-generator.js'
 
 /**
  * Tool response strategy registry.
@@ -7,12 +8,15 @@ import { generateDqlResult } from './dql-generator.js'
  * Tools listed here are GENERATED (a server-side function synthesizes the
  * result per call). Everything else is CANNED (looked up from the table by
  * tool name + argument key). This is the hybrid, per-tool model:
- *   - get-problem-by-id -> canned (stable facts keyed by problemId)
+ *   - get-problem-by-id -> generated from live em_alert records (by problemId)
  *   - execute-dql       -> generated (plausible, now()-relative Grail data)
  */
 var GENERATED_TOOLS = {
     'execute-dql': function (args) {
         return generateDqlResult(args)
+    },
+    'get-problem-by-id': function (args) {
+        return generateProblemResult(args)
     },
 }
 

@@ -1,4 +1,5 @@
 import { GlideRecord, gs } from '@servicenow/glide'
+import { mapProblemRecordById } from './problem-generator.js'
 
 /**
  * DQL response generator for the Dynatrace MCP Simulator.
@@ -294,30 +295,19 @@ function genEntityService(dql) {
 }
 
 function genProblems(dql) {
-    var fact = readFact('problem')
-    var end = nowMs()
-    var rec
-    if (fact && fact.record) {
-        rec = fact.record
-    } else {
-        rec = {
-            timestamp: tsNano(end - 60 * 1000),
-            'event.category': 'ERROR',
-            display_id: firstMatch(dql, /(P-\d+)/) || 'P-261013',
-            'event.status': 'OPEN',
-            'event.kind': 'DAVIS_PROBLEM',
-            'event.name': 'Failure rate increase',
-            'event.severity': '3',
-            affected_entity_ids: ['SERVICE-612D78ED86A2A09B'],
-            affected_entity_names: ['frontend'],
-            'dt.entity.service': ['SERVICE-612D78ED86A2A09B'],
-            'event.start': tsNano(end - 6 * 60 * 1000),
-            'event.description':
-                '# Failure rate increase\n\nThe error rate increased to 7.89 %.\nEndpoint GET /api/recommendations has a failure rate increase.',
-        }
+    // Reuse the em_alert-backed mapper so the problem narrative is consistent
+    // with the get-problem-by-id tool. Pull the problem id from the filter.
+    var id =
+        firstMatch(dql, /display_id\s*==\s*"([^"]+)"/i) ||
+        firstMatch(dql, /event\.id\s*==\s*"([^"]+)"/i) ||
+        firstMatch(dql, /(P-\d+)/)
+    var records = []
+    if (id) {
+        var rec = mapProblemRecordById(id)
+        if (rec) records.push(rec)
     }
     var mappings = { display_id: strType(), 'event.name': strType(), 'event.status': strType() }
-    return buildGrailResult(dql, [rec], mappings, 1219, parseWindowSeconds(dql))
+    return buildGrailResult(dql, records, mappings, records.length ? 1219 : 0, parseWindowSeconds(dql))
 }
 
 function genLogs(dql) {

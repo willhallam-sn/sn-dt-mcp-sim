@@ -65,3 +65,14 @@ CrossScopePrivilege({
     targetScope: 'global',
     targetType: 'scriptable',
 })
+
+// Read access to em_alert (global) so the public (guest-context) MCP endpoint
+// can source get-problem-by-id responses from live alert records.
+CrossScopePrivilege({
+    $id: Now.ID['xsp-read-em-alert'],
+    status: 'allowed',
+    operation: 'read',
+    targetName: 'em_alert',
+    targetScope: 'global',
+    targetType: 'sys_db_object',
+})

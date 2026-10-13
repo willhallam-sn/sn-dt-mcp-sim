@@ -4,9 +4,11 @@ A ServiceNow scoped application that **emulates the Dynatrace MCP server** insid
 the platform, to support demos. It exposes a REST endpoint that speaks the Model
 Context Protocol (MCP) so AI agents expecting to talk to a real Dynatrace tenant
 can call it unchanged. Responses follow a **hybrid, per-tool model**: some tools
-return **canned** payloads from an editable table, while `execute-dql` is
-**generated** on the fly so situational data (timestamps, time windows, bin
-series, counts, error rates) is always plausible for the moment it is called.
+return **canned** payloads from an editable table, while `execute-dql` and
+`get-problem-by-id` are **generated** on the fly — the former synthesizing
+plausible Grail data (timestamps, bins, counts, error rates) for the moment it
+is called, the latter building a Davis problem record from live `em_alert`
+records on the instance.
 
 - **Scope:** `x_snc_dynatrace_mc`
 - **Fluent SDK:** 4.13.6
@@ -200,12 +202,37 @@ Each tool has a **response strategy** (`GENERATED_TOOLS` registry in `mcp-lib.js
 
 | Tool | Argument | Strategy | What it does |
 |---|---|---|---|
-| `get-problem-by-id` | `problemId` (e.g. `P-261013`) | **canned** | Returns the stored Davis-problem payload matched by `problemId`. |
+| `get-problem-by-id` | `problemId` (e.g. `P-261013`) | **generated** | `problem-generator.js` finds the `em_alert` whose `message_key` matches the id and maps it into a Davis problem record. |
 | `execute-dql` | `dqlQueryString` | **generated** | `dql-generator.js` synthesizes a plausible Grail response from the parsed query — no stored blob to match. |
 
 Canned tools are data-driven — any tool with `tools/call` rows is advertised and
 answerable; add/edit rows or import a capture to extend them. Generated tools are
 always advertised even with no table rows.
+
+### The problem generator (`get-problem-by-id`)
+
+Rather than a static payload, this builds the Davis problem record from a **live
+`em_alert`** so the simulated tenant reflects real instance data. Lookup: match
+`em_alert.message_key == problemId`; if none (group alerts store a sys_id there),
+fall back to an `additional_info` / `sn_alert_tags` CONTAINS match on the id.
+
+Mapping (`problem-generator.js`): the alert's `additional_info` JSON carries the
+Dynatrace specifics as `flattened.<field>.<index>` keys, reassembled into the
+record arrays (`affected_entity_ids/names/types`, `dt.entity.service`,
+`dt.davis.event_ids`, `smartscape.affected_entity.*`, `dt.openpipeline.pipelines`);
+`state` → `event.status` (Open/Reopen/Flapping → `ACTIVE`, Closed → `CLOSED`,
+which also adds `event.end` + `resolved_problem_duration`); `severity` →
+`event.severity`; `short_description`/`description` → `event.name` (parsed from
+the markdown heading) / `event.description`; `initial_event_time`/`last_event_time`
+→ `event.start`/`timestamp`. The envelope is the full 3-block Grail form with
+`metadata.grail` echoing the canonical `fetch dt.davis.problems … display_id ==
+"<id>"` query, a `now()`-relative timeframe, and a fresh `queryId`. No matching
+alert → a valid-but-empty result (`records: []`), never an `isError`.
+
+Because the public endpoint runs as the guest user, a `CrossScopePrivilege`
+**read on `em_alert`** (global) is declared in Fluent. The `fetch dt.davis.problems`
+`execute-dql` path reuses the same mapper, so DQL and tool lookups tell a
+consistent problem story.
 
 ### The DQL generator (`execute-dql`)
 
@@ -445,12 +472,13 @@ One filterable syslog line per request, prefixed `[MCP]`:
 ```
 src/
 ├── fluent/
-│   ├── auth/credential.now.ts      Credential Record, hash-sync BusinessRule, CrossScopePrivileges
+│   ├── auth/credential.now.ts      Credential Record, hash-sync BusinessRule, CrossScopePrivileges (incl. em_alert read)
 │   ├── rest/mcp-api.now.ts         Public Scripted REST service + /mcp and /import routes
 │   └── tables/canned-response.now.ts  Canned MCP Response table + form
 └── server/
     ├── auth-lib.js                 Pure-JS SHA-256, key extract/verify, IP allow list, logging (canonical)
     ├── dql-generator.js            execute-dql response generator (parses DQL, synthesizes Grail data from facts)
+    ├── problem-generator.js        get-problem-by-id generator (maps em_alert -> Davis problem record)
     ├── key-hash-br.js              BR script (inlined SHA-256) — keep salt/algo in sync with auth-lib.js
     ├── mcp-handler.js              /mcp handler: gate, dispatch, batch, sessions
     ├── mcp-import.js               /import handler: gate, parse, upsert, regenerate tools/list
@@ -466,10 +494,11 @@ seed-data.xml.txt   Unload file of seed rows (rename to .xml to import)
 
 ## Limitations
 
-- **Canned tools are static table data; generated tools are heuristic.** There is
-  no real Grail, Davis, or Smartscape behind this. `get-problem-by-id` returns
-  stored facts; `execute-dql` data is synthesized by `dql-generator.js` from a
-  parsed query + base facts, not a real query engine.
+- **Canned tools are static table data; generated tools are heuristic or
+  data-backed.** There is no real Grail, Davis, or Smartscape engine behind this.
+  `get-problem-by-id` is built from live `em_alert` records (so it reflects real
+  instance data, but only for alerts that exist); `execute-dql` data is
+  synthesized by `dql-generator.js` from a parsed query + base facts.
 - **The DQL generator covers the SRE-agent repertoire, not all of DQL.** It
   recognizes the data sources, filters, and clauses listed above; other shapes
   return a valid-but-empty Grail result. It parses patterns heuristically — it

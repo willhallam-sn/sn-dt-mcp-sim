@@ -29,6 +29,14 @@ declare global {
                         table: 'sys_scope_privilege'
                         id: '83ea90a93b778750f40c93ae53e45a22'
                     }
+                    '8738264e3b3703900c872d7e53e45a3b': {
+                        table: 'sys_scope_privilege'
+                        id: '8738264e3b3703900c872d7e53e45a3b'
+                    }
+                    '8738264e3b3703900c872d7e53e45a3f': {
+                        table: 'sys_scope_privilege'
+                        id: '8738264e3b3703900c872d7e53e45a3f'
+                    }
                     '91a0824a3bfbcf500c872d7e53e45a83': {
                         table: 'sys_scope_privilege'
                         id: '91a0824a3bfbcf500c872d7e53e45a83'
@@ -48,6 +56,10 @@ declare global {
                     bom_json: {
                         table: 'sys_module'
                         id: 'a466267aa61f485d902627e2be494530'
+                    }
+                    c738264e3b3703900c872d7e53e45a0e: {
+                        table: 'sys_scope_privilege'
+                        id: 'c738264e3b3703900c872d7e53e45a0e'
                     }
                     ce9818693b778750f40c93ae53e45acc: {
                         table: 'sys_scope_privilege'
@@ -117,6 +129,10 @@ declare global {
                         table: 'sys_module'
                         id: '43b645b12fd14a30b2773504b56b3020'
                     }
+                    'src_server_problem-generator_js': {
+                        table: 'sys_module'
+                        id: 'bbd85290e33d4f19944ec8dd8e927e95'
+                    }
                     'xsp-cc-get-attribute': {
                         table: 'sys_scope_privilege'
                         id: 'b2ffbc03c5ae495aac15cd93ad992608'
@@ -124,6 +140,10 @@ declare global {
                     'xsp-cc-get-credential': {
                         table: 'sys_scope_privilege'
                         id: '7e0e1efae6a84fc096e13eeabd1488b0'
+                    }
+                    'xsp-read-em-alert': {
+                        table: 'sys_scope_privilege'
+                        id: 'c3af6191785646e2a6020a30959fdc68'
                     }
                 }
                 composite: [
