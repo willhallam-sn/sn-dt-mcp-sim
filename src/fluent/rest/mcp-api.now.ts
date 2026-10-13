@@ -24,7 +24,7 @@ RestApi({
             path: '/mcp',
             script: handleMcp,
             consumes: 'application/json',
-            produces: 'application/json',
+            produces: 'application/json,text/event-stream',
             // Public at the platform level: no ServiceNow login. The handler
             // gates itself with an API key (+ optional IP allow list) so an
             // external MCP client can connect like a real Dynatrace tenant.

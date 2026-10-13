@@ -73,6 +73,35 @@ function summarize(message) {
     return '-'
 }
 
+/** True if the client negotiated the SSE transport (MCP Streamable HTTP). */
+function wantsSse(request) {
+    var accept = ''
+    try {
+        accept = '' + (request.getHeader('Accept') || request.getHeader('accept') || '')
+    } catch (e) {
+        accept = ''
+    }
+    return /text\/event-stream/i.test(accept)
+}
+
+/**
+ * Emit one or more JSON-RPC responses as an SSE stream, the way the real
+ * dynatrace-mcp server (MCP SDK Streamable HTTP transport) does. Each message
+ * is its own `event: message` / `data: <json>` frame; the stream then closes.
+ */
+function sendSse(response, messages) {
+    response.setStatus(200)
+    response.setContentType('text/event-stream')
+    response.setHeader('Cache-Control', 'no-cache')
+    var list = Array.isArray(messages) ? messages : [messages]
+    var buf = ''
+    for (var i = 0; i < list.length; i++) {
+        buf += 'event: message\ndata: ' + JSON.stringify(list[i]) + '\n\n'
+    }
+    var writer = response.getStreamWriter()
+    writer.writeString(buf)
+}
+
 export function handleMcp(request, response) {
     response.setHeader('Content-Type', 'application/json')
 
@@ -121,33 +150,38 @@ export function handleMcp(request, response) {
     }
 
     var summary = summarize(message)
+    var sse = wantsSse(request)
 
+    // Collect responses (notifications produce none).
+    var responses = []
     if (Array.isArray(message)) {
-        var out = []
         for (var i = 0; i < message.length; i++) {
             var r = dispatch(message[i])
             if (r !== null) {
-                out.push(r)
+                responses.push(r)
             }
         }
-        if (out.length === 0) {
-            response.setStatus(202)
-            logRequest(request, 'OK', 202, summary)
-            return
+    } else {
+        var single = dispatch(message)
+        if (single !== null) {
+            responses.push(single)
         }
-        response.setStatus(200)
-        response.setBody(out)
-        logRequest(request, 'OK', 200, summary)
-        return
     }
 
-    var single = dispatch(message)
-    if (single === null) {
+    // Notifications/responses only -> 202 Accepted, no body (both transports).
+    if (responses.length === 0) {
         response.setStatus(202)
         logRequest(request, 'OK', 202, summary)
         return
     }
+
+    var payload = Array.isArray(message) ? responses : responses[0]
+    if (sse) {
+        sendSse(response, payload)
+        logRequest(request, 'OK', 200, summary + ' (sse)')
+        return
+    }
     response.setStatus(200)
-    response.setBody(single)
+    response.setBody(payload)
     logRequest(request, 'OK', 200, summary)
 }
