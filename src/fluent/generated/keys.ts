@@ -5,6 +5,14 @@ declare global {
         namespace Internal {
             interface Keys extends KeysRegistry {
                 explicit: {
+                    '15a0824a3bfbcf500c872d7e53e45a7f': {
+                        table: 'sys_scope_privilege'
+                        id: '15a0824a3bfbcf500c872d7e53e45a7f'
+                    }
+                    '19a0824a3bfbcf500c872d7e53e45a77': {
+                        table: 'sys_scope_privilege'
+                        id: '19a0824a3bfbcf500c872d7e53e45a77'
+                    }
                     '1b2554613b778750f40c93ae53e45a7a': {
                         table: 'sys_scope_privilege'
                         id: '1b2554613b778750f40c93ae53e45a7a'
@@ -21,6 +29,22 @@ declare global {
                         table: 'sys_scope_privilege'
                         id: '83ea90a93b778750f40c93ae53e45a22'
                     }
+                    '8738264e3b3703900c872d7e53e45a3b': {
+                        table: 'sys_scope_privilege'
+                        id: '8738264e3b3703900c872d7e53e45a3b'
+                    }
+                    '8738264e3b3703900c872d7e53e45a3f': {
+                        table: 'sys_scope_privilege'
+                        id: '8738264e3b3703900c872d7e53e45a3f'
+                    }
+                    '91a0824a3bfbcf500c872d7e53e45a83': {
+                        table: 'sys_scope_privilege'
+                        id: '91a0824a3bfbcf500c872d7e53e45a83'
+                    }
+                    '95a0824a3bfbcf500c872d7e53e45a7b': {
+                        table: 'sys_scope_privilege'
+                        id: '95a0824a3bfbcf500c872d7e53e45a7b'
+                    }
                     '972558293b378750f40c93ae53e45aa3': {
                         table: 'sys_scope_privilege'
                         id: '972558293b378750f40c93ae53e45aa3'
@@ -33,6 +57,10 @@ declare global {
                         table: 'sys_module'
                         id: 'a466267aa61f485d902627e2be494530'
                     }
+                    c738264e3b3703900c872d7e53e45a0e: {
+                        table: 'sys_scope_privilege'
+                        id: 'c738264e3b3703900c872d7e53e45a0e'
+                    }
                     ce9818693b778750f40c93ae53e45acc: {
                         table: 'sys_scope_privilege'
                         id: 'ce9818693b778750f40c93ae53e45acc'
@@ -40,6 +68,10 @@ declare global {
                     d3ead0a53bb78750f40c93ae53e45af9: {
                         table: 'sys_scope_privilege'
                         id: 'd3ead0a53bb78750f40c93ae53e45af9'
+                    }
+                    d9a08e0a3bfbcf500c872d7e53e45ab1: {
+                        table: 'sys_scope_privilege'
+                        id: 'd9a08e0a3bfbcf500c872d7e53e45ab1'
                     }
                     'dynatrace-mcp-api': {
                         table: 'sys_ws_definition'
@@ -52,6 +84,22 @@ declare global {
                     'dynatrace-mcp-route-mcp': {
                         table: 'sys_ws_operation'
                         id: '53d67b59ceb14538a8ba089e806eb838'
+                    }
+                    'dynatrace-mcp-route-mcp-delete': {
+                        table: 'sys_ws_operation'
+                        id: '0758d601306b4edc8755b16c3b221424'
+                    }
+                    'dynatrace-mcp-route-mcp-get': {
+                        table: 'sys_ws_operation'
+                        id: '64c1148b214c43288dc3ebfc5fe05c5a'
+                    }
+                    e3f246c23b3fcf500c872d7e53e45ab1: {
+                        table: 'sys_scope_privilege'
+                        id: 'e3f246c23b3fcf500c872d7e53e45ab1'
+                    }
+                    f5b282ce3bbf8f50f40c93ae53e45acd: {
+                        table: 'sys_scope_privilege'
+                        id: 'f5b282ce3bbf8f50f40c93ae53e45acd'
                     }
                     'mcp-api-key-credential': {
                         table: 'api_key_credentials'
@@ -69,6 +117,10 @@ declare global {
                         table: 'sys_module'
                         id: '1d2c2c1e8f8e4ad19c6a642cea69564c'
                     }
+                    'src_server_dql-generator_js': {
+                        table: 'sys_module'
+                        id: '6bcf34cbc8b44d84bbc7ede5ada82a62'
+                    }
                     'src_server_key-hash-br_js': {
                         table: 'sys_module'
                         id: '9cd0119425ab4f1c8670655acec8119f'
@@ -85,6 +137,10 @@ declare global {
                         table: 'sys_module'
                         id: '43b645b12fd14a30b2773504b56b3020'
                     }
+                    'src_server_problem-generator_js': {
+                        table: 'sys_module'
+                        id: 'bbd85290e33d4f19944ec8dd8e927e95'
+                    }
                     'xsp-cc-get-attribute': {
                         table: 'sys_scope_privilege'
                         id: 'b2ffbc03c5ae495aac15cd93ad992608'
@@ -92,6 +148,10 @@ declare global {
                     'xsp-cc-get-credential': {
                         table: 'sys_scope_privilege'
                         id: '7e0e1efae6a84fc096e13eeabd1488b0'
+                    }
+                    'xsp-read-em-alert': {
+                        table: 'sys_scope_privilege'
+                        id: 'c3af6191785646e2a6020a30959fdc68'
                     }
                 }
                 composite: [

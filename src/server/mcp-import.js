@@ -1,4 +1,4 @@
-import { parseExchanges, exchangeToSpec, upsertSpec, TABLE } from './mcp-lib.js'
+import { parseExchanges, exchangeToSpec, upsertSpec, TABLE, readRequestBody } from './mcp-lib.js'
 import { checkAccess, logRequest } from './auth-lib.js'
 import { GlideRecord } from '@servicenow/glide'
 
@@ -90,10 +90,16 @@ export function handleImport(request, response) {
     }
 
     var raw = ''
-    try {
-        raw = request.body && request.body.dataString ? request.body.dataString : ''
-    } catch (e) {
-        raw = ''
+    var body = readRequestBody(request)
+    if (body.json !== undefined) {
+        // Platform parsed the JSON body; re-stringify so parseExchanges can work on it.
+        try {
+            raw = JSON.stringify(body.json)
+        } catch (e) {
+            raw = ''
+        }
+    } else {
+        raw = body.raw
     }
 
     if (!raw) {

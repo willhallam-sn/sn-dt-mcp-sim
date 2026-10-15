@@ -125,4 +125,19 @@
     <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
     <tool_name>execute-dql</tool_name>
   </x_snc_dynatrace_mc_response>
+  <x_snc_dynatrace_mc_response action="INSERT_OR_UPDATE">
+    <active>true</active>
+    <match_key>service-catalog</match_key>
+    <match_type>key</match_type>
+    <method>tools/call</method>
+    <name>_fact :: service-catalog (editable base fact for the DQL generator)</name>
+    <notes>Base fact consumed by the execute-dql generator (dql-generator.js). Edit this JSON to tune the simulated service topology and per-service error-rate profile without changing code. If this row is absent the generator uses built-in defaults. tool_name=_fact rows are never advertised as MCP tools.</notes>
+    <request_arguments/>
+    <response_payload>{"services":{"SERVICE-612D78ED86A2A09B":{"name":"frontend","technology":"NODE_JS","iconType":"node-js","environment":"aew31262","baselineRps":8,"called_by":["SERVICE-352C0D90592C8454"],"calls":["SERVICE-50FA7E919B28E12B","SERVICE-3C92115F407E5A92","SERVICE-FA5C2B6FCA01E2EF","SERVICE-5173FDDC82067426","SERVICE-6550EEA117BD5577","SERVICE-837D260324B57999","SERVICE-889783342AAF4FF8","SERVICE-826D760F82C46C41"],"errorProfile":{"endpoint":"GET /api/recommendations","peakErrorRate":7.89}}}}</response_payload>
+    <sequence>200</sequence>
+    <sys_class_name>x_snc_dynatrace_mc_response</sys_class_name>
+    <sys_id>da0000000000000000000000000000f1</sys_id>
+    <sys_scope display_value="Dynatrace MCP Simulator">8b0588293b738750f40c93ae53e45a94</sys_scope>
+    <tool_name>_fact</tool_name>
+  </x_snc_dynatrace_mc_response>
 </unload>

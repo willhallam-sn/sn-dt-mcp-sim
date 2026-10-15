@@ -1,4 +1,27 @@
 import { GlideRecord, gs } from '@servicenow/glide'
+import { generateDqlResult } from './dql-generator.js'
+import { generateProblemResult } from './problem-generator.js'
+
+/**
+ * Tool response strategy registry.
+ *
+ * Tools listed here are GENERATED (a server-side function synthesizes the
+ * result per call). Everything else is CANNED (looked up from the table by
+ * tool name + argument key). This is the hybrid, per-tool model:
+ *   - get-problem-by-id -> generated from live em_alert records (by problemId)
+ *   - execute-dql       -> generated (plausible, now()-relative Grail data)
+ */
+var GENERATED_TOOLS = {
+    'execute-dql': function (args) {
+        return generateDqlResult(args)
+    },
+    'get-problem-by-id': function (args) {
+        return generateProblemResult(args)
+    },
+}
+
+/** Internal tool_name used for editable base-fact rows the generator reads. */
+export var FACT_TOOL = '_fact'
 
 /**
  * Shared logic for the Dynatrace MCP Simulator.
@@ -152,11 +175,22 @@ export function buildToolsListResult() {
     gr.query()
     while (gr.next()) {
         var t = '' + gr.getValue('tool_name')
-        if (t && !seen[t]) {
+        if (t && t !== FACT_TOOL && !seen[t]) {
             seen[t] = true
             tools.push({
                 name: t,
                 description: 'Simulated Dynatrace MCP tool: ' + t,
+                inputSchema: { type: 'object', additionalProperties: true },
+            })
+        }
+    }
+    // Always advertise generated tools even if they have no table rows.
+    for (var gkey in GENERATED_TOOLS) {
+        if (Object.prototype.hasOwnProperty.call(GENERATED_TOOLS, gkey) && !seen[gkey]) {
+            seen[gkey] = true
+            tools.push({
+                name: gkey,
+                description: 'Simulated Dynatrace MCP tool: ' + gkey,
                 inputSchema: { type: 'object', additionalProperties: true },
             })
         }
@@ -213,6 +247,20 @@ export function missingToolResult(toolName, args) {
     }
 }
 
+/**
+ * Resolve the MCP result for a tools/call, routing by the tool strategy:
+ * generated tools run their generator; everything else is a canned lookup.
+ * Returns the MCP result object, or null if a canned tool has no matching row
+ * (the handler then emits missingToolResult).
+ */
+export function resolveToolResult(toolName, args) {
+    var gen = GENERATED_TOOLS[toolName]
+    if (gen) {
+        return gen(args || {})
+    }
+    return findToolResult(toolName, args)
+}
+
 export function jsonrpcResult(id, result) {
     return { jsonrpc: '2.0', id: id === undefined ? null : id, result: result }
 }
@@ -223,6 +271,52 @@ export function jsonrpcError(id, code, message) {
 
 export function newSessionId() {
     return gs.generateGUID()
+}
+
+/**
+ * Robustly read a Scripted REST request body.
+ *
+ * When a route declares `consumes: application/json`, the platform parses the
+ * body into `request.body.data` (an object/array) and leaves
+ * `request.body.dataString` EMPTY. So we must prefer `.data`. Returns
+ * { json, raw }: `json` is the parsed value when the platform parsed it; `raw`
+ * is the unparsed string otherwise. Callers use whichever they need.
+ */
+export function readRequestBody(request) {
+    var result = { json: undefined, raw: '' }
+    var body
+    try {
+        body = request.body
+    } catch (e) {
+        return result
+    }
+    if (!body) return result
+
+    // Prefer the parsed value (JSON bodies land here and dataString is empty).
+    try {
+        var d = body.data
+        if (d !== null && d !== undefined) {
+            if (typeof d === 'object') {
+                result.json = d
+                return result
+            }
+            if (typeof d === 'string' && d !== '') {
+                result.raw = d
+                return result
+            }
+        }
+    } catch (e) {
+        /* fall through to raw */
+    }
+
+    // Fall back to the raw string stream.
+    try {
+        var s = body.dataString
+        if (s) result.raw = '' + s
+    } catch (e) {
+        /* give up */
+    }
+    return result
 }
 
 /* --------------------------------------------------------------------------
