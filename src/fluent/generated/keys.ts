@@ -93,6 +93,14 @@ declare global {
                         table: 'sys_ws_operation'
                         id: '64c1148b214c43288dc3ebfc5fe05c5a'
                     }
+                    DynatraceExecuteDql: {
+                        table: 'sys_script_include'
+                        id: 'de4e33b9214349d8967276d419680e9d'
+                    }
+                    DynatraceGetProblemById: {
+                        table: 'sys_script_include'
+                        id: '5905c1f124884462969297c043450f1f'
+                    }
                     e3f246c23b3fcf500c872d7e53e45ab1: {
                         table: 'sys_scope_privilege'
                         id: 'e3f246c23b3fcf500c872d7e53e45ab1'
@@ -140,6 +148,14 @@ declare global {
                     'src_server_problem-generator_js': {
                         table: 'sys_module'
                         id: 'bbd85290e33d4f19944ec8dd8e927e95'
+                    }
+                    'src_server_script-includes_dynatrace-execute-dql_js': {
+                        table: 'sys_module'
+                        id: '6a398c96c67148689cd3196bbdf82bc1'
+                    }
+                    'src_server_script-includes_dynatrace-get-problem-by-id_js': {
+                        table: 'sys_module'
+                        id: '04547ceed27f454dbc9f2a73d9b0e132'
                     }
                     'xsp-cc-get-attribute': {
                         table: 'sys_scope_privilege'

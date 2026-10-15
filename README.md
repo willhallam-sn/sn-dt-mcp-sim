@@ -262,6 +262,47 @@ are never advertised as tools.
 
 ---
 
+## Script-callable tools (no MCP call)
+
+The same simulated tools are callable **directly from server-side scripts** —
+business rules, Flow / AI-agent script steps, scheduled jobs, background scripts
+— without opening an MCP/HTTP connection. Each tool has a Script Include wrapper
+that takes the **same input** as the MCP tool and returns the **same MCP result
+object** (`content` / `isError` / `structuredContent`). They are thin
+`Class.create` bridges that delegate to the shared `resolveToolResult` in
+`mcp-lib.js`, so the script path and the `/mcp` endpoint return identical
+payloads.
+
+| Script Include | MCP tool | Primary method | Convenience |
+|---|---|---|---|
+| `DynatraceGetProblemById` | `get-problem-by-id` | `getProblemById(problemId)` → MCP result | `getRecords(problemId)` → records array; `call({ problemId })` → exact MCP-arg parity |
+| `DynatraceExecuteDql` | `execute-dql` | `execute(dqlQueryString)` → MCP result | `getRecords(dqlQueryString)` → records array; `call({ dqlQueryString })` → exact MCP-arg parity |
+
+Both are scoped `accessibleFrom: 'public'`, so flows/agents in other scopes can
+call them as `new x_snc_dynatrace_mc.DynatraceGetProblemById()`.
+
+```javascript
+// Problem lookup (same data the MCP get-problem-by-id tool returns)
+var dt = new x_snc_dynatrace_mc.DynatraceGetProblemById();
+var result  = dt.getProblemById('P-261013');   // { content, isError, structuredContent }
+var records = dt.getRecords('P-261013');        // structuredContent.records[]
+
+// DQL (same data the MCP execute-dql tool returns)
+var dql = new x_snc_dynatrace_mc.DynatraceExecuteDql();
+var res  = dql.execute('fetch dt.davis.problems, from:now() - 24h | filter display_id == "P-261013"');
+var recs = dql.getRecords('fetch dt.entity.service | filter id == "SERVICE-612D78ED86A2A09B"');
+```
+
+Implementation note: the wrapper (`src/server/script-includes/*.js`) is a
+`Class.create` include (no Glide imports, `// @ts-nocheck`) that
+`require('./src/server/mcp-lib.js')`. The SDK resolves a leading-`./` require to
+the app's module namespace (`<scope>/<pkg>/<version>/<path>`); the registered
+module is under `src/server`, so the specifier must be `./src/server/...` (not
+`./dist/...`). Adding a new tool to the `GENERATED_TOOLS` registry makes it
+callable here by giving it a matching wrapper.
+
+---
+
 ## The Canned MCP Response table
 
 **`x_snc_dynatrace_mc_response`** (label: *Canned MCP Response*). One row per
