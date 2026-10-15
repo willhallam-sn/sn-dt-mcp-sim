@@ -185,3 +185,34 @@ export function handleMcp(request, response) {
     response.setBody(payload)
     logRequest(request, 'OK', 200, summary)
 }
+
+/**
+ * GET /mcp — the MCP Streamable-HTTP client opens this to listen for
+ * server-initiated SSE messages. This simulator is stateless and does not push
+ * server-initiated messages, so per the MCP spec we answer 405 Method Not
+ * Allowed ("the server does not offer an SSE stream at this endpoint"). A
+ * compliant client treats 405 as "no server stream" and proceeds POST-only.
+ *
+ * This route MUST exist: without it the platform returns a bare 404 for the
+ * client's GET before any script runs, which crashes the client's session
+ * worker ("unhandled errors in a TaskGroup") before it ever POSTs initialize.
+ */
+export function handleMcpGet(request, response) {
+    response.setStatus(405)
+    response.setHeader('Allow', 'POST, DELETE')
+    response.setHeader('Content-Type', 'application/json')
+    response.setBody(jsonrpcError(null, -32000, 'Method Not Allowed: server does not offer an SSE stream on GET'))
+    logRequest(request, 'OK', 405, 'get-stream')
+}
+
+/**
+ * DELETE /mcp — the client terminates the MCP session. The simulator holds no
+ * server-side session state, so acknowledge with 200 OK so the client closes
+ * cleanly instead of erroring on an unknown route.
+ */
+export function handleMcpDelete(request, response) {
+    response.setStatus(200)
+    response.setHeader('Content-Type', 'application/json')
+    response.setBody({ jsonrpc: '2.0', result: {} })
+    logRequest(request, 'OK', 200, 'delete-session')
+}

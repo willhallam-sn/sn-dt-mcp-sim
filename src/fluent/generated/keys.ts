@@ -85,6 +85,14 @@ declare global {
                         table: 'sys_ws_operation'
                         id: '53d67b59ceb14538a8ba089e806eb838'
                     }
+                    'dynatrace-mcp-route-mcp-delete': {
+                        table: 'sys_ws_operation'
+                        id: '0758d601306b4edc8755b16c3b221424'
+                    }
+                    'dynatrace-mcp-route-mcp-get': {
+                        table: 'sys_ws_operation'
+                        id: '64c1148b214c43288dc3ebfc5fe05c5a'
+                    }
                     e3f246c23b3fcf500c872d7e53e45ab1: {
                         table: 'sys_scope_privilege'
                         id: 'e3f246c23b3fcf500c872d7e53e45ab1'
